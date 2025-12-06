@@ -17,9 +17,9 @@ extern "C" void app_main(void) {
 
   // make the i2c we'll use to communicate
   static constexpr auto i2c_port = I2C_NUM_0;
-  static constexpr auto i2c_clock_speed = 400000;
-  static constexpr gpio_num_t i2c_sda = (gpio_num_t)GPIO_NUM_8;
-  static constexpr gpio_num_t i2c_scl = (gpio_num_t)GPIO_NUM_9;
+  static constexpr auto i2c_clock_speed = CONFIG_EXAMPLE_I2C_CLOCK_SPEED_HZ;
+  static constexpr gpio_num_t i2c_sda = (gpio_num_t)CONFIG_EXAMPLE_I2C_SDA_GPIO;
+  static constexpr gpio_num_t i2c_scl = (gpio_num_t)CONFIG_EXAMPLE_I2C_SCL_GPIO;
   espp::I2c i2c({.port = i2c_port,
                  .sda_io_num = i2c_sda,
                  .scl_io_num = i2c_scl,
@@ -137,16 +137,14 @@ extern "C" void app_main(void) {
 
     // print time and raw IMU data
     std::string text = "";
-    text += fmt::format("{:.3f},", now / 1'000'000.0f);
-    text +=
-        fmt::format("{:02.3f},{:02.3f},{:02.3f},", (float)accel.x, (float)accel.y, (float)accel.z);
-    text += fmt::format("{:03.3f},{:03.3f},{:03.3f},", (float)gyro.x, (float)gyro.y, (float)gyro.z);
-    text += fmt::format("{:02.1f},", temp);
+    text += fmt::format("{:.3f}, ", now / 1'000'000.0f);
+    // text += fmt::format("{:02.3f},{:02.3f},{:02.3f}, ", (float)accel.x, (float)accel.y, (float)accel.z);
+    // text += fmt::format("{:03.3f},{:03.3f},{:03.3f}, ", (float)gyro.x, (float)gyro.y, (float)gyro.z);
+    // text += fmt::format("{:02.1f}, ", temp);
+    
     // print kalman filter outputs
-    text += fmt::format("{:03.3f},{:03.3f},{:03.3f},", (float)orientation.x, (float)orientation.y,
-                        (float)orientation.z);
-    text += fmt::format("{:03.3f},{:03.3f},{:03.3f},", (float)gravity_vector.x,
-                        (float)gravity_vector.y, (float)gravity_vector.z);
+    text += fmt::format("{:03.3f},{:03.3f},{:03.3f}, ", (float)orientation.x, (float)orientation.y, (float)orientation.z);
+    text += fmt::format("{:03.3f},{:03.3f},{:03.3f}, ", (float)gravity_vector.x, (float)gravity_vector.y, (float)gravity_vector.z);
 
     auto madgwick_orientation = madgwick_filter_fn(dt, accel, gyro);
     float roll = madgwick_orientation.roll;
@@ -157,8 +155,8 @@ extern "C" void app_main(void) {
     float vz = -cos(pitch) * cos(roll);
 
     // print madgwick filter outputs
-    text += fmt::format("{:03.3f},{:03.3f},{:03.3f},", roll, pitch, yaw);
-    text += fmt::format("{:03.3f},{:03.3f},{:03.3f}", vx, vy, vz);
+    // text += fmt::format("{:03.3f},{:03.3f},{:03.3f},", roll, pitch, yaw);
+    // text += fmt::format("{:03.3f},{:03.3f},{:03.3f}", vx, vy, vz);
 
     fmt::print("{}\n", text);
 
